@@ -1,0 +1,64 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: your-application-name
+# MySQL 配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql-container:3306/discordBot?sessionVariables=sql_mode='NO_ENGINE_SUBSTITUTION'&jdbcCompliantTruncation=false
+    username: your-username
+    password: your-password
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+# RabbitMQ 配置
+  rabbitmq:
+    host: mq  # 你的虚拟机IP
+    port: 5672 # 端口
+    username: xuzi # 用户名
+    password: your-password # 密码
+
+# Redis 配置
+  data:
+    redis:
+      # 数据库
+      database: 0
+      host: redis-container
+      # 端口
+      port: 6379
+#      # 密码
+      password: your-password
+      # 读超时
+      timeout: 5s
+      # 连接超时
+      connect-timeout: 5s
+
+# Cloudflare R2 对象存储配置
+cloudflare:
+  r2:
+    # 在 Cloudflare Dashboard 中创建的 R2 API Token
+    access-key: "your-access-key"
+    secret-key: "your-secret-key"
+    # R2 存储桶的端点地址
+    endpoint: ""
+    # 存储桶名称
+    bucket-name: "your-bucket-name"
+    # 可选：自定义域名（用于生成文件访问 URL）
+    custom-domain: ""
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+openai:
+  api:
+    url: https://api.openai.com/v1/chat/completions
+
+# 日志配置
+logging:
+  level:
+    robin.discordbot.service.CloudflareR2Service: DEBUG
+    software.amazon.awssdk.services.s3: DEBUG

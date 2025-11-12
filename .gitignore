@@ -1,0 +1,25 @@
+src/main/resources/.env
+
+
+/target/
+/.mvn/
+/.idea/
+/discordbot.iml/
+/.vscode/
+
+# Maven build directories
+target/
+*/target/
+
+# Environment files with sensitive data
+.env.local
+.env.production
+**/.env.local
+**/.env.production
+
+# IDE files
+.DS_Store
+discordbot-main/src/main/resources/.env
+discordbot-main/src/main/resources/application-dev.yaml
+discordbot-main/src/main/resources/application-pro.yaml
+discordbot-main/src/main/resources/application.yaml

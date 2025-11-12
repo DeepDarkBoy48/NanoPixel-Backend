@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="robin.discordbot.mapper.AiMapper">
+
+    <update id="updateAI">
+        UPDATE ai_prompts
+        <set>
+            <if test="aiPrompt.prompt != null">prompt = #{aiPrompt.prompt},</if>
+            <if test="aiPrompt.creator != null">creator = #{aiPrompt.creator},</if>
+            <if test="aiPrompt.creationTime != null">creation_time = #{aiPrompt.creationTime},</if>
+            <if test="aiPrompt.modelName != null">model_name = #{aiPrompt.modelName},</if>
+            <if test="aiPrompt.category != null">category = #{aiPrompt.category},</if>
+            <if test="aiPrompt.isEnable != null">is_enable = #{aiPrompt.isEnable},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- New mappers for executing arbitrary SQL -->
+    <select id="executeSelect" resultType="java.util.Map">
+        ${sql}
+    </select>
+
+    <update id="executeUpdateOrInsertOrDelete">
+        ${sql}
+    </update>
+
+</mapper>
