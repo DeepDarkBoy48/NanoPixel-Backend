@@ -6,6 +6,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,6 +32,9 @@ import static dev.langchain4j.store.embedding.chroma.ChromaApiVersion.V2;
 @Configuration
 public class Langchain4j {
     private static final Dotenv dotenv = Dotenv.load();
+
+    @Value("${chromaBaseUrl}")
+    private String chromaBaseUrl;
 
     public static String getGoogleToken() {
         return dotenv.get("geminiTier1Token");
@@ -96,7 +100,7 @@ public class Langchain4j {
         return ChromaEmbeddingStore.builder()
                 .apiVersion(V2)
                 .collectionName("xuzi")
-                .baseUrl(dotenv.get("chromaBaseUrl"))
+                .baseUrl(chromaBaseUrl)
                 .logRequests(true)
                 .logResponses(true)
                 .timeout(Duration.ofMinutes(5))
