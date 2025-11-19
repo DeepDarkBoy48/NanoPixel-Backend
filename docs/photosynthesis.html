@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光合作用演示 (Photosynthesis Demo)</title>
+    <style>
+        :root {
+            --sky-color: #87CEEB;
+            --ground-color: #8B4513;
+            --leaf-color: #228B22;
+            --sun-color: #FFD700;
+            --text-color: #333;
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, var(--sky-color) 60%, var(--ground-color) 60%);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* UI Controls */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: var(--card-bg);
+            padding: 15px 30px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        h2 { margin-top: 0; color: #2c3e50; }
+        p { line-height: 1.6; color: #555; }
+
+        /* Graphics */
+        .sun {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #FFF 10%, var(--sun-color) 60%);
+            border-radius: 50%;
+            box-shadow: 0 0 40px var(--sun-color);
+            animation: pulse 3s infinite alternate;
+            z-index: 10;
+        }
+
+        @keyframes pulse {
+            from { box-shadow: 0 0 40px var(--sun-color); transform: scale(1); }
+            to { box-shadow: 0 0 80px var(--sun-color); transform: scale(1.1); }
+        }
+
+        .plant-container {
+            position: absolute;
+            bottom: 35%; /* On the ground line */
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stem {
+            width: 20px;
+            height: 200px;
+            background: #556B2F;
+            position: relative;
+        }
+
+        .leaf {
+            width: 120px;
+            height: 80px;
+            background: var(--leaf-color);
+            border-radius: 5px 100px 5px 100px;
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            transform: rotate(-10deg);
+            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .leaf::after {
+            content: ''; /* Vein */
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: rgba(0,0,0,0.1);
+            transform: rotate(-2deg);
+        }
+
+        .roots {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 60px;
+        }
+        
+        .root-line {
+            position: absolute;
+            background: #8B4513; /* Darker root color */
+            width: 4px;
+            border-radius: 2px;
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 20;
+        }
+
+        .photon {
+            width: 8px;
+            height: 8px;
+            background: yellow;
+            box-shadow: 0 0 10px yellow;
+        }
+
+        .water {
+            width: 20px;
+            height: 20px;
+            background: #3498db;
+            content: 'H₂O';
+        }
+
+        .co2 {
+            width: 24px;
+            height: 24px;
+            background: #7f8c8d;
+            font-size: 9px;
+        }
+
+        .oxygen {
+            width: 20px;
+            height: 20px;
+            background: #e74c3c;
+        }
+
+        .glucose {
+            width: 30px;
+            height: 30px;
+            background: #f39c12;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            border-radius: 0;
+        }
+
+        /* Chemical Formula Display */
+        #formula {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .formula-part {
+            opacity: 0.3;
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        
+        .active-part {
+            opacity: 1;
+            transform: scale(1.2);
+            color: #fff;
+        }
+
+        /* Animations Classes */
+        @keyframes moveUp {
+            0% { transform: translateY(100px); opacity: 1; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes floatIn {
+            0% { transform: translate(-100px, -50px); opacity: 0; }
+            100% { transform: translate(0, 0); opacity: 1; }
+        }
+        
+        @keyframes floatOut {
+            0% { transform: translate(0, 0); opacity: 1; }
+            100% { transform: translate(100px, -50px); opacity: 0; }
+        }
+
+        @keyframes flash {
+            0% { background-color: var(--leaf-color); }
+            50% { background-color: #7CFC00; box-shadow: 0 0 30px #7CFC00; }
+            100% { background-color: var(--leaf-color); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <!-- Background Elements -->
+    <div class="sun"></div>
+    
+    <!-- Formula -->
+    <div id="formula">
+        <span id="f-light" class="formula-part">光能 + </span>
+        <span id="f-co2" class="formula-part">6CO₂ + </span>
+        <span id="f-water" class="formula-part">6H₂O</span>
+        <span class="formula-part"> → </span>
+        <span id="f-glucose" class="formula-part">C₆H₁₂O₆ + </span>
+        <span id="f-oxygen" class="formula-part">6O₂</span>
+    </div>
+
+    <!-- Plant -->
+    <div class="plant-container">
+        <div class="leaf" id="main-leaf"></div>
+        <div class="stem"></div>
+        <div class="roots">
+            <!-- Simple SVG roots -->
+            <svg width="100" height="60" style="overflow: visible;">
+                <path d="M50,0 Q50,30 20,50" stroke="#8B4513" stroke-width="4" fill="none" />
+                <path d="M50,0 Q50,40 50,60" stroke="#8B4513" stroke-width="4" fill="none" />
+                <path d="M50,0 Q50,30 80,50" stroke="#8B4513" stroke-width="4" fill="none" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div id="info-panel">
+        <h2 id="step-title">光合作用 (Photosynthesis)</h2>
+        <p id="step-desc">点击“开始演示”来观看植物如何制造食物。</p>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+        <button id="start-btn" onclick="startAnimation()">开始演示</button>
+        <button id="reset-btn" onclick="resetAnimation()" style="background-color: #f39c12; display:none;">重置</button>
+    </div>
+</div>
+
+<script>
+    const leaf = document.getElementById('main-leaf');
+    const title = document.getElementById('step-title');
+    const desc = document.getElementById('step-desc');
+    const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    
+    let isAnimating = false;
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function updateInfo(t, d) {
+        title.innerText = t;
+        desc.innerText = d;
+    }
+
+    function highlightFormula(id) {
+        document.querySelectorAll('.formula-part').forEach(el => el.classList.remove('active-part'));
+        if(id) document.getElementById(id).classList.add('active-part');
+    }
+
+    function createParticle(type, startX, startY, text='') {
+        const p = document.createElement('div');
+        p.className = `particle ${type}`;
+        if(text) p.innerText = text;
+        p.style.left = startX + 'px';
+        p.style.top = startY + 'px';
+        document.getElementById('container').appendChild(p);
+        return p;
+    }
+
+    async function startAnimation() {
+        if (isAnimating) return;
+        isAnimating = true;
+        startBtn.disabled = true;
+        startBtn.style.display = 'none';
+        resetBtn.style.display = 'inline-block';
+        resetBtn.disabled = true;
+
+        // Get coordinates
+        const leafRect = leaf.getBoundingClientRect();
+        const leafX = leafRect.left + leafRect.width / 2;
+        const leafY = leafRect.top + leafRect.height / 2;
+        
+        const rootRect = document.querySelector('.roots').getBoundingClientRect();
+        const rootX = rootRect.left + rootRect.width / 2;
+        const rootY = rootRect.top;
+
+        const sunRect = document.querySelector('.sun').getBoundingClientRect();
+        const sunX = sunRect.left + sunRect.width / 2;
+        const sunY = sunRect.top + sunRect.height / 2;
+
+        // Step 1: Sunlight
+        updateInfo("1. 光能 (Light Energy)", "太阳发出光能，被叶片中的叶绿体吸收。这是动力的来源。");
+        highlightFormula('f-light');
+        
+        for(let i=0; i<5; i++) {
+            const photon = createParticle('photon', sunX, sunY);
+            photon.style.opacity = 1;
+            photon.style.transition = 'all 1s ease-in';
+            // Randomize target slightly on leaf
+            const targetX = leafX + (Math.random() * 40 - 20);
+            const targetY = leafY + (Math.random() * 20 - 10);
+            
+            setTimeout(() => {
+                photon.style.transform = `translate(${targetX - sunX}px, ${targetY - sunY}px)`;
+            }, 100 * i);
+            
+            setTimeout(() => photon.remove(), 1100 + 100*i);
+        }
+        await sleep(2000);
+
+        // Step 2: Water
+        updateInfo("2. 水分 (Water)", "植物通过根部从土壤中吸收水分 (H₂O)，并通过茎输送到叶片。");
+        highlightFormula('f-water');
+        
+        const waters = [];
+        for(let i=0; i<3; i++) {
+            const water = createParticle('water', rootX, rootY + 50, 'H₂O');
+            water.style.opacity = 1;
+            water.style.transition = 'all 1.5s linear';
+            waters.push(water);
+            
+            setTimeout(() => {
+                water.style.transform = `translate(0, -${(rootY + 50) - leafY}px)`;
+            }, 200 * i);
+        }
+        await sleep(2000);
+        waters.forEach(w => w.remove());
+
+        // Step 3: CO2
+        updateInfo("3. 二氧化碳 (CO₂)", "叶片表面的气孔打开，吸收空气中的二氧化碳 (CO₂)。");
+        highlightFormula('f-co2');
+
+        const co2s = [];
+        for(let i=0; i<3; i++) {
+            // Start from random air positions
+            const startX = leafX + 200;
+            const startY = leafY - 50 + (i*30);
+            const co2 = createParticle('co2', startX, startY, 'CO₂');
+            co2.style.opacity = 1;
+            co2.style.transition = 'all 1.5s ease-out';
+            co2s.push(co2);
+
+            setTimeout(() => {
+                co2.style.transform = `translate(${leafX - startX}px, ${leafY - startY}px)`;
+            }, 200 * i);
+        }
+        await sleep(2000);
+        co2s.forEach(c => c.remove());
+
+        // Step 4: Reaction
+        updateInfo("4. 化学反应 (Reaction)", "在叶绿体内，光能将水和二氧化碳转化为葡萄糖和氧气。");
+        highlightFormula(''); // Highlight nothing or arrow?
+        
+        leaf.style.animation = 'flash 1s ease-in-out 2';
+        await sleep(2000);
+
+        // Step 5: Products (Oxygen & Glucose)
+        updateInfo("5. 产物 (Products)", "反应产生了葡萄糖 (能量) 和氧气。氧气被释放回空气中。");
+        highlightFormula('f-oxygen');
+        highlightFormula('f-glucose'); // Highlight both
+
+        // Oxygen leaving
+        for(let i=0; i<3; i++) {
+            const o2 = createParticle('oxygen', leafX, leafY, 'O₂');
+            o2.style.opacity = 1;
+            o2.style.transition = 'all 2s ease-out';
+            
+            const targetX = leafX + 150 + (Math.random()*50);
+            const targetY = leafY - 100 + (Math.random()*50);
+
+            setTimeout(() => {
+                o2.style.transform = `translate(${targetX - leafX}px, ${targetY - leafY}px)`;
+                o2.style.opacity = 0;
+            }, 100);
+            
+            setTimeout(() => o2.remove(), 2100);
+        }
+
+        // Glucose staying/storing
+        const glucose = createParticle('glucose', leafX, leafY, '');
+        glucose.style.opacity = 1;
+        glucose.title = "Glucose";
+        glucose.style.transition = 'all 1s ease';
+        // Move slightly down to stem to simulate storage
+        setTimeout(() => {
+            glucose.style.transform = `translate(0, 100px)`;
+        }, 500);
+
+        await sleep(2000);
+        
+        updateInfo("完成 (Complete)", "光合作用过程结束。植物利用这些能量生长，并为我们提供氧气！");
+        resetBtn.disabled = false;
+    }
+
+    function resetAnimation() {
+        location.reload();
+    }
+</script>
+
+</body>
+</html>
