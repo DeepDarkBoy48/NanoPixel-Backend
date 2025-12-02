@@ -23,7 +23,7 @@ public class PromptCategoryController {
         return Result.success("创建分类成功");
     }
 
-    @GetMapping
+    @GetMapping()
     public Result<List<PromptCategoryVo>> list() {
         List<PromptCategoryVo> list = promptCategoryService.list();
         return Result.success(list);

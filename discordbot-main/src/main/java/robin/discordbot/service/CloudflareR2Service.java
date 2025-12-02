@@ -250,14 +250,15 @@ public class CloudflareR2Service {
         // 格式: https://<bucket-name>.<account-id>.r2.cloudflarestorage.com/<file-name>
         // 或者如果配置了自定义域名，可以使用自定义域名
         System.out.println(fileName);
-        return "https://pub-d2e4cfca78f042f29331f4f9fcf74111.r2.dev/" + fileName;
+        return "https://img.nanopixel.uk/" + fileName;
     }
 
     public String handleUrl(String url) {
         if (url == null || url.isBlank()) {
             return url;
         }
-        return "https://nanopixel.uk/cdn-cgi/image/format=webp,quality=85/" + url;
+        return "https://img.nanopixel.uk/cdn-cgi/image/format=webp,quality=85/" + url;
     }
 
 }
+

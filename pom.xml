@@ -15,7 +15,6 @@
     <modules>
         <module>discordbot-common</module>
         <module>discordbot-main</module>
-        <module>notebook</module>
     </modules>
 
     <!-- 属性配置 -->

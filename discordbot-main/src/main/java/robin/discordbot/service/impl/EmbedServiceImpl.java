@@ -19,6 +19,7 @@ import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import robin.discordbot.mapper.embedMapper;
@@ -35,6 +36,10 @@ import static dev.langchain4j.store.embedding.filter.MetadataFilterBuilder.metad
 @Service
 @RequiredArgsConstructor
 public class EmbedServiceImpl implements EmbedService {
+
+
+    @Value("${chromaBaseUrl}")
+    private String chromaBaseUrl;
 
     private final EmbeddingModel embeddingModel;
     private final EmbeddingStore<TextSegment> embeddingStore;
@@ -55,7 +60,7 @@ public class EmbedServiceImpl implements EmbedService {
 
         EmbeddingStore<TextSegment> embeddingStore = ChromaEmbeddingStore.builder()
                 .apiVersion(V2)
-                .baseUrl(dotenv.get("chromaBaseUrl"))
+                .baseUrl(chromaBaseUrl)
                 .collectionName("xuzi")
                 .logRequests(true)
                 .logResponses(true)

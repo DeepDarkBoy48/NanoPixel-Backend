@@ -37,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import robin.discordbot.mapper.AiMapper;
 import robin.discordbot.mapper.MainChannelServiceImplTestMapper;
@@ -73,6 +74,10 @@ public class MainWebChannelAIServiceImplAGENT implements MainChannelAIService {
     private final UserService userService;
 
     Dotenv dotenv = Dotenv.load();
+
+    @Value("${chromaBaseUrl}")
+    private String chromaBaseUrl;
+
     @Autowired
     private AiMapper aiMapper;
 
@@ -284,7 +289,7 @@ public class MainWebChannelAIServiceImplAGENT implements MainChannelAIService {
                 @P(value = "maxResults, default is 8, max is 20, min is 3") Integer maxResults) {
             EmbeddingStore<TextSegment> embeddingStore = ChromaEmbeddingStore.builder()
                     .apiVersion(V2)
-                    .baseUrl(dotenv.get("chromaBaseUrl"))
+                    .baseUrl(chromaBaseUrl)
                     .collectionName("xuzi")
                     .logRequests(true)
                     .logResponses(true)
