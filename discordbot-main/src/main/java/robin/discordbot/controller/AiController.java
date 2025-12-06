@@ -48,7 +48,6 @@ public class AiController {
             return Result.error("用户积分不足");
         }
 
-
         // 设置文件夹
         String folder = "Ai.GeminiEdit";
         // 上传原始图片
@@ -87,7 +86,7 @@ public class AiController {
             url = r2Service.uploadBytes(processedImageBytes, fileName, contentType, folder);
             // 检查是否需要翻译为中文
             if (model.equals("nanobananaWithChinese")) {
-                //先使用banana再使用seedream4
+                // 先使用banana再使用seedream4
                 // 调用seedream4处理图片，返回url
                 ArrayList<String> fistProcessedUrls = new ArrayList<>();
                 fistProcessedUrls.add(url);
@@ -146,7 +145,7 @@ public class AiController {
         return Result.success(mediaList);
     }
 
-    @PutMapping("/media/public")
+    @PutMapping("/media/public/update")
     public Result<String> setMediaPublic(@RequestParam Long mediaId, @RequestParam Boolean isPublic) {
         Map<String, Object> map = ThreadLocalUtil.get();
         String username = (String) map.get("username");
